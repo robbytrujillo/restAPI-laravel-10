@@ -11,8 +11,12 @@ use Illuminate\Http\Request;
 // import Resource "PostResource" (22052023)
 use App\Http\Resources\PostResource;
 
+// import Facade "Storage"
+use Illuminate\Support\Facades\Storage;
+
 // import Facade "Validator"
 use Illuminate\Support\Facades\Validator;
+
 
 class PostController extends Controller
 {
@@ -52,6 +56,57 @@ class PostController extends Controller
 
         // return response (22052023)
         return new PostResource(true, 'Data Post Berhasil Ditambahkan!', $post);
+    }
+
+    // tambahkan fungsi show (22052023)
+    public function show($id) {
+        // find post by ID (22052023)
+        $post = Post::find($id);
+
+        // return single post as a resource
+        return new PostResource(true, 'Detail Data Post', $post);
+    }
+
+    // tambahkan fungsi update (22052023)
+    public function update(Request $request, $id) {
+        // define validation rules (22052023)
+        $validator = Validator::make($request->all(), [
+            'title' => 'required',
+            'content' => 'required',
+        ]);
+
+        // check if validation fails (22052023)
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 442);
+        }
+
+        // find post by ID (22052023)
+        $post = Post::find($id);
+
+        // check if image is not empty (22052023)
+        if ($request->hasFile('image')) {
+
+            // upload image (22052023)
+            $image = $request->file('image');
+            $image->storeAs('public/posts', $image->hashName());
+
+            // update post with new image (22052023)
+            $post->update([
+                'image' => $image->hashName(),
+                'title' => $request->title,
+                'content' => $request->content,
+            ]);
+ 
+        } else {
+            // update post without image (22052023)
+            $post->update([
+                'title' => $request->title,
+                'content' => $request->content,
+            ]);
+        }
+
+        // return response (22052023)
+        return new PostResource(true, 'Data Post Berhasil Diubah!', $post);
     }
 
 }
