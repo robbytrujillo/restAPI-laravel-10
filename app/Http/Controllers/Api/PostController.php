@@ -109,4 +109,19 @@ class PostController extends Controller
         return new PostResource(true, 'Data Post Berhasil Diubah!', $post);
     }
 
+    // tambah fungsi destroy (22052023)
+    public function destroy($id) {
+        // find post by ID (22052023)
+        $post = Post::find($id);
+
+        // delete image (22052023)
+        Storage::delete('public/posts/'.basename($post->image));
+
+        // delete post (22052023)
+        $post->delete();
+
+        // return response (22052023) mengembalikan response JSON menggunakan API Resource.
+        return new PostResource(true, 'Data Post Berhasil Dihapus!', null);
+    }
+
 }
